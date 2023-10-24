@@ -12,19 +12,41 @@ intents = discord.Intents.all() # Подключаем "Разрешения"
 intents.message_content = True
 # Подгружаем префикс и интенты
 bot = commands.Bot(config['prefix'], intents=intents) 
+
+# Класс для кнопок
+class MyView(discord.ui.View):
+
+    # Кнопка "Предметы"
+    @discord.ui.button(label="Предметы", style=discord.ButtonStyle.red, emoji="⚔️")
+    async def button_items(self, interaction, button):
+        await interaction.response.send_message("Крутой меч!")
+
+    # Кнопка "Мобы"
+    @discord.ui.button(label="Мобы", style=discord.ButtonStyle.primary, emoji="👤")
+    async def button_mobs(self, interaction, button):
+        await interaction.response.send_message("Крутой моб!")
         
+    # Кнопка "Квесты"
+    @discord.ui.button(label="Квесты", style=discord.ButtonStyle.green, emoji="🔎")
+    async def button_tasks(self, interaction, button):
+        await interaction.response.send_message("Крутой квест!")
 
-# Команда "Предметы"
+# Команда "Меню"
 @bot.command()
-async def items(ctx):
+async def menu(ctx):
 
+# Главная вкладка "Меню"
+    emb = discord.Embed(title='Навигация по РП',
+        description='В этом меню находятся три вкладки.\n "Предметы" - все предметы которые можно найти в РП.\n "Мобы" - Любой моб или NPS которые есть в РП.\n "Квесты" - Все возможные квесты РП',
+        color=discord.Color.gold()
+    )
+    
 # Вкладка "Предметы"
-    embitem = discord.Embed(
+    embitems = discord.Embed(
         title='Предметы',
         description='Вкладка разбита на\n "Оружие" - любое оружие существующие в РП\n "Броня" - любая броня существующая в РП\n "Еда" - любая еда существующая в РП\n  "Расходники" - любые расходники существующие в РП',
         color=discord.Color.red()
     )
-
 # Вкладка "Оружие"
     embweapon = discord.Embed(
         title='Оружие',
@@ -49,24 +71,12 @@ async def items(ctx):
         description='"Расходники" - любые расходники существующие в РП',
         color=discord.Color.red()
     )
-
-    embitems = [embitem, embweapon, embarmor, embfood, embother]
-
-    message = await ctx.send(embed=embitem)
-    page = Paginator(bot, message, only=ctx.author, use_more=True, embeds=embitems, timeout= 150, delete_message= 150)
-    await page.start()  
-
-# Команда "Мобы"
-@bot.command()
-async def mobs(ctx):
-
 # Вкладка "Мобы"
-    embmob = discord.Embed(
+    embmobs = discord.Embed(
         title='Мобы',
         description='Вкладка разбита на\n "Враждебные" - все виды агресивных мобов в РП\n "NPS" - любой моб с которым можно как-то взаимодействовать в РП\n "Мирные" - любая моб который сразу не нападает',
         color=discord.Color.blurple()
     )
-
 # Вкладка "Враждебные"
     embenemy = discord.Embed(
         title='Враждебные',
@@ -85,19 +95,9 @@ async def mobs(ctx):
         description='"Мирные" - любая моб который сразу не нападает',
         color=discord.Color.blurple()
     )
-        
-    embmobs = [embmob, embenemy, embnps, embpeaceful]
-        
-    message = await ctx.send(embed=embmob)
-    page = Paginator(bot, message, only=ctx.author, use_more=True, embeds=embmobs, timeout= 150, delete_message= 150)
-    await page.start()
-
-# Команда "Задания"
-@bot.command()
-async def tasks(ctx):
 
 # Вкладка "Квесты"
-    embtask = discord.Embed(
+    embtasks = discord.Embed(
         title='Квесты',
         description='Вкладка разбита на\n "Боевые" - квест, основной задачей которого является победа кого-либо в РП\n "Сбор" - квест, основной задачей которого является сбор каких либо ресурсов\n "Приключения" - квест, основной задачей которого является выплнение какой либо миссии связаной с загадками и приключениями',
         color=discord.Color.green()
@@ -122,10 +122,12 @@ async def tasks(ctx):
         color=discord.Color.green()
     )
 
-    embtasks = [embtask, embfights, embfarms, embadventures]
+    embs = [emb, [embitems, embweapon, embarmor, embfood ,embother], [embmobs, embenemy, embnps, embpeaceful],[embtasks, embfights, embfarms, embadventures]]
+    
 
-    message = await ctx.send(embed=embtask)
-    page = Paginator(bot, message, only=ctx.author, use_more=True, embeds=embtasks, timeout= 150, delete_message= 150)
-    await page.start()
+    await ctx.send(embed=emb, view=MyView())
+#    page = Paginator(bot, message, only=ctx.author, use_more=True, embeds=embs, footer=False, timeout= 150, delete_message= 150)
+#    await page.start()
+
 
 bot.run(config['token'])
